@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thiệp Động</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600&display=swap&subset=vietnamese" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5ede0;
+      font-family: 'Noto Serif', 'Segoe UI', Tahoma, Arial, serif;
+    }
+
+    .scene {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1200px;
+      padding: 2rem;
+    }
+
+    .card-wrap {
+      position: relative;
+      width: 420px;
+      height: 520px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: width 0.15s ease;
+    }
+
+    .card-wrap.open {
+      width: 840px;
+    }
+
+    .cover {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 4px 12px 12px 4px;
+      background: linear-gradient(135deg, #f8f0e3 0%, #eedfc8 100%);
+      border: 0.5px solid #d4b896;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      box-shadow: 3px 4px 18px rgba(0,0,0,0.18), inset -2px 0 6px rgba(0,0,0,0.06);
+      transition: opacity 0.25s ease;
+      z-index: 10;
+    }
+
+    .card-wrap.open .cover {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .cover-icon { font-size: 52px; line-height: 1; }
+    .cover-title { font-size: 20px; color: #7a5230; letter-spacing: 1px; }
+    .cover-hint { font-size: 12px; color: #a07850; letter-spacing: 0.5px; }
+
+    /* cover icons removed */
+
+    .book {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease 0.35s;
+    }
+
+    .card-wrap.open .book {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .page {
+      flex: 1;
+      height: 100%;
+      background: #fffdf7;
+      border: 0.5px solid #d6c9a8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-left {
+      border-radius: 12px 0 0 12px;
+      border-right: 1px dashed #e0d0b0;
+      background: #fef9ee;
+      transform-origin: right center;
+    }
+
+    .card-wrap.open .page-left {
+      animation: flipLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .page-right {
+      border-radius: 0 12px 12px 0;
+      border-left: none;
+      transform-origin: left center;
+    }
+
+    .card-wrap.open .page-right {
+      animation: flipRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes flipLeft {
+      0% { transform: rotateY(90deg); opacity: 0; }
+      100% { transform: rotateY(0deg); opacity: 1; }
+    }
+
+    @keyframes flipRight {
+      0% { transform: rotateY(-90deg); opacity: 0; }
+      40% { opacity: 0; }
+      100% { transform: rotateY(0deg); opacity: 1; }
+    }
+
+    .spine {
+      width: 6px;
+      height: 100%;
+      background: linear-gradient(to right, #c4a87a, #e8d5a8, #c4a87a);
+      flex-shrink: 0;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 220px;
+      border-radius: 8px;
+      background: #f0e6d0;
+      border: 1.5px dashed #c4a878;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .image-placeholder.has-image {
+      border: none;
+      background: none;
+    }
+
+    .image-placeholder.has-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .upload-hint {
+      font-size: 12px;
+      color: #a07850;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .upload-input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .page-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #b09070;
+      margin-bottom: 12px;
+    }
+
+    .lines-area {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .message-text {
+      width: 100%;
+      flex: 1;
+      color: #4a3520;
+      font-family: 'Noto Serif', 'Segoe UI', Tahoma, Arial, serif;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .write-line::placeholder { color: #c8b898; font-style: italic; }
+    .write-line:focus {
+      border-bottom-color: #a07850;
+      background: rgba(200, 160, 100, 0.04);
+    }
+
+    .caption-input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #d6c9a8;
+      background: transparent;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      color: #7a5230;
+      outline: none;
+      text-align: center;
+      padding: 6px 4px 4px;
+      caret-color: #8b6030;
+    }
+
+    .caption-input::placeholder { color: #c8b898; font-style: italic; }
+
+    .close-btn {
+      position: absolute;
+      top: 8px; right: 10px;
+      font-size: 18px;
+      color: #b09070;
+      cursor: pointer;
+      background: none;
+      border: none;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+
+    .close-btn:hover { color: #7a5230; }
+
+    .decoration {
+      position: absolute;
+      bottom: 10px;
+      font-size: 22px;
+      opacity: 0.35;
+    }
+  </style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="card-wrap" id="card" onclick="openCard(event)">
+
+    <div class="cover" id="cover">
+      <div class="cover-icon">💌</div>
+
+      
+
+      <div class="cover-title">HAPPY BIRTHDAY</div>
+      <div class="cover-hint"></div>
+    </div>
+
+    <div class="book">
+      <div class="page page-left">
+        <button class="close-btn" onclick="closeCard(event)" title="Đóng thiệp">✕</button>
+        <div class="page-label">Hình ảnh</div>
+
+        <div class="image-placeholder has-image" id="imgBox">
+          <img src="m.jpg" alt="Ảnh thiệp" />
+          <input type="file" accept="image/*" class="upload-input" onchange="loadImage(event)" onclick="stopProp(event)" />
+        </div>
+
+        
+        <div class="decoration" style="left: 12px;">🌸</div>
+      </div>
+
+      <div class="spine"></div>
+
+      <div class="page page-right">
+        <div class="page-label">Lời nhắn</div>
+        <div class="lines-area">
+          <div class="message-text">
+M&#7915;ng sinh nh&#7853;t Anh - ng&#432;&#7901;i thuy&#7873;n trưởng t&#224;i ba,
+T&#226;m s&#225;ng, tr&#237; b&#232;n, nhi&#7871;t huy&#7871;t đong đầy.
+Vững tay l&#225;i giữa mu&#417;n tr&#249;ng s&#243;ng g&#243;,
+Dẫn Vietcombank ti&#7871;n b&#432;&#7891;c tương lai.
+
+Ng&#432;&#7901;i gieo ni&#7871;m tin, khơi nguồn kh&#225;t vọng,
+Kết nối đồng lòng, thắp sáng niềm tin.
+Mỗi quyết sách là một lần mở lối,
+Đưa con tàu vươn tới những tầm nhìn.
+
+Chúc người lãnh đạo luôn mạnh khỏe, an vui,
+Bản lĩnh, nhân văn, trí tuệ sáng ngời.
+Là thuyền trưởng tài ba, đ&#7841;y nhiệt huyết,
+Dẫn Vietcombank phát triển rạng ngời.
+
+Thêm tuổi mới, thêm thành công mới,
+Thêm niềm vui, thêm sức mạnh bền lâu.
+Chúc con tàu Vietcombank vững tiến,
+Vươn biển lớn, tỏa sáng muôn màu.
+          </div>
+        </div>
+        <div class="decoration" style="right: 12px;">🌿</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function openCard(e) {
+    const card = document.getElementById('card');
+    if (!card.classList.contains('open')) {
+      card.classList.add('open');
+    }
+  }
+
+  function closeCard(e) {
+    e.stopPropagation();
+    document.getElementById('card').classList.remove('open');
+  }
+
+  function stopProp(e) {
+    e.stopPropagation();
+  }
+
+  function loadImage(e) {
+    e.stopPropagation();
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const box = document.getElementById('imgBox');
+      box.classList.add('has-image');
+      box.innerHTML = '<img src="' + ev.target.result + '" alt="Ảnh thiệp" />';
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
+
+</body>
+</html>
